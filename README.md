@@ -88,20 +88,10 @@ agy acp --login
 ### 安装（PowerShell）
 
 ```powershell
-claude plugin marketplace add lvdoushacc/antigravity-acp
-```
-
-```powershell
-claude plugin install antigravity-acp@antigravity-acp
+claude plugin marketplace add lvdoushacc/antigravity-acp; claude plugin install antigravity-acp@antigravity-acp
 ```
 
 装完重开一个 Claude Code 对话就能用了。
-
-也可以在 Claude Code 的输入框里直接输入：
-
-```
-/plugin install antigravity-acp --marketplace lvdoushacc/antigravity-acp
-```
 
 ### 使用
 
