@@ -33,12 +33,6 @@ Windows (PowerShell):
 irm https://raw.githubusercontent.com/lvdoushacc/antigravity-acp/main/install-codex.ps1 | iex
 ```
 
-macOS / Linux:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/lvdoushacc/antigravity-acp/main/install-codex.sh | sh
-```
-
 The script does the manual steps below, keeping any other plugins you have
 listed. Then restart Codex and trust the hook under **Settings > Hooks**
 (or `/hooks` in the CLI). Installing a plugin does not trust its hooks.
