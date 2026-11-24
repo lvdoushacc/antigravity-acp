@@ -1,8 +1,0 @@
-{
-  "name": "agy",
-  "version": "0.1.0",
-  "description": "/agy <task> sends the task straight to Antigravity over a warm ACP connection, without Codex's model.",
-  "hooks": "./hooks/hooks.json",
-  "skills": "./skills/",
-  "license": "MIT"
-}

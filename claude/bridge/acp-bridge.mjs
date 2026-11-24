@@ -98,7 +98,7 @@ async function getSession(cwd, name, fresh, model) {
       const a = await getAgy();
       const r = await a.request('session/new', { cwd, mcpServers: [] });
       log('new session', r.sessionId, 'for', JSON.stringify(name), 'in', cwd);
-      return { sessionId: r.sessionId, queue: Promise.resolve(), models: r.models, model: null };
+      return { sessionId: r.sessionId, queue: Promise.resolve(), models: r.models, model: r.models?.currentModelId ?? null };
     })();
     sessions.set(key, p);
     p.catch(() => { if (sessions.get(key) === p) sessions.delete(key); });
@@ -108,14 +108,31 @@ async function getSession(cwd, name, fresh, model) {
   return s;
 }
 
+// Accepts an exact model id or a loose name: "carbon-high", "4 carbon high",
+// "Gemini 4 Carbon (High)". Throws listing the ids when it matches none or several.
+const squash = (s) => String(s).toLowerCase().replace(/gemini/g, '').replace(/[^a-z0-9]/g, '');
+function resolveModel(s, wanted) {
+  const list = s.models?.availableModels || [];
+  const ids = list.map((m) => m.modelId);
+  if (!list.length || ids.includes(wanted)) return wanted;
+  const w = squash(wanted);
+  const exact = list.filter((m) => squash(m.modelId) === w || squash(m.name) === w);
+  const loose = exact.length ? exact : list.filter((m) => squash(m.modelId).includes(w) || squash(m.name).includes(w));
+  if (loose.length === 1) return loose[0].modelId;
+  const why = loose.length ? `matches several (${loose.map((m) => m.modelId).join(', ')})` : 'matches no model';
+  throw new Error(`"${wanted}" ${why}. Available: ${ids.join(', ')}`);
+}
+
 async function setModel(a, s, model) {
-  if (!model || s.model === model) return;
+  if (!model) return;
+  const id = resolveModel(s, model);
+  if (s.model === id) return;
   try {
-    await a.request('session/set_model', { sessionId: s.sessionId, modelId: model });
-    s.model = model;
+    await a.request('session/set_model', { sessionId: s.sessionId, modelId: id });
+    s.model = id;
   } catch (err) {
     const ids = (s.models?.availableModels || []).map((m) => m.modelId).join(', ');
-    throw new Error(`could not set model "${model}": ${err.message}. Available: ${ids}`);
+    throw new Error(`could not set model "${id}": ${err.message}. Available: ${ids}`);
   }
 }
 
@@ -252,6 +269,28 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === 'GET' && url.pathname === '/health') {
       return reply(res, 200, { ok: true, pid: process.pid, agyRunning: !!agy, sessions: sessions.size, jobs: jobs.size });
+    }
+    if (req.method === 'GET' && url.pathname === '/models') {
+      // The models a session offers, and the one it uses now.
+      const cwd = url.searchParams.get('cwd');
+      if (!cwd) return reply(res, 400, { error: 'cwd is required' });
+      const s = await getSession(cwd, url.searchParams.get('session') || 'default', false);
+      return reply(res, 200, {
+        current: s.model,
+        available: (s.models?.availableModels || []).map((m) => ({ id: m.modelId, name: m.name })),
+      });
+    }
+    if (req.method === 'POST' && url.pathname === '/model') {
+      // Switch a session's model without running a task. Accepts loose names.
+      const body = await readBody(req);
+      if (!body.cwd || !body.model) return reply(res, 400, { error: 'cwd and model are required' });
+      try {
+        const s = await getSession(body.cwd, body.session || 'default', false, body.model);
+        const m = (s.models?.availableModels || []).find((x) => x.modelId === s.model);
+        return reply(res, 200, { current: s.model, name: m?.name ?? s.model });
+      } catch (err) {
+        return reply(res, 400, { error: err.message });
+      }
     }
     if (req.method === 'POST' && url.pathname === '/jobs') {
       const body = await readBody(req);

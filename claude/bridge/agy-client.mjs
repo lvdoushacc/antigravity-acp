@@ -1,5 +1,5 @@
 // agy-client: talk to the warm ACP bridge from anything that runs Node.
-// Used by the Codex hook (codex-hook.mjs) and usable from any terminal:
+// Usable from any terminal, and from any other client that runs Node:
 //
 //   node agy-client.mjs [--new] [--read-only] [--session NAME] [--cwd DIR] "task"
 //
@@ -96,8 +96,16 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     else if (a === '--session') opts.session = argv[++i];
     else if (a === '--cwd') opts.cwd = argv[++i];
     else if (a === '--model') opts.model = argv[++i];
+    else if (a === '--ensure') opts.ensure = true;
     else words.push(a);
   }
+  if (opts.ensure) {
+    // Start the shared bridge in the background if it is not running, then
+    // exit. The bridge belongs to no client and outlives this process.
+    ensureBridge(opts.cwd)
+      .then(() => { console.log('ok'); process.exit(0); })
+      .catch((err) => { console.error(err.message); process.exit(1); });
+  } else {
   opts.task = words.join(' ').trim();
   if (!opts.task) {
     console.error('usage: node agy-client.mjs [--new] [--read-only] [--session NAME] [--cwd DIR] [--model ID] "task"');
@@ -108,4 +116,5 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   runJob({ ...opts, signal: ac.signal })
     .then((job) => { console.log(format(job)); process.exit(job.status === 'done' ? 0 : 1); })
     .catch((err) => { console.error(`Antigravity: ${err.message}`); process.exit(1); });
+  }
 }

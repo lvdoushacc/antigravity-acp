@@ -1,6 +1,6 @@
 // The shared secret every client sends as `x-bridge-token`. It lives in
 // ~/.agy-acp/token, one per user, so every copy of this code (the Claude
-// plugin, the Codex hook, the CLI) reaches the same bridge. Whoever needs it
+// plugin in every session, the CLI) reaches the same bridge. Whoever needs it
 // first creates it. `node token.mjs` prints it.
 import { randomBytes } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
