@@ -88,10 +88,10 @@ agy acp --login
 ### 安装（PowerShell）
 
 ```powershell
-claude plugin marketplace add lvdoushacc/antigravity-acp; claude plugin install antigravity-acp@antigravity-acp
+irm https://raw.githubusercontent.com/lvdoushacc/antigravity-acp/main/install-claude.ps1 | iex
 ```
 
-装完重开一个 Claude Code 对话就能用了。
+装完重开一个 Claude Code 对话就能用了。以后想更新，再运行一次这行就行。
 
 ### 使用
 
