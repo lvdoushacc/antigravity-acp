@@ -28,8 +28,23 @@ Answer `y` to add the marketplace, then pick a scope. Then type `/agy hello`.
 
 ## Install in Codex / 在 Codex 里安装
 
-Copy [`codex/agy/`](codex/agy/) to `~/.codex/plugins/agy` and follow
-[`codex/agy/README.md`](codex/agy/README.md) (marketplace entry, then trust the hook).
+Windows (PowerShell):
+
+```powershell
+irm https://raw.githubusercontent.com/lvdoushacc/antigravity-acp/main/install-codex.ps1 | iex
+```
+
+macOS / Linux:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/lvdoushacc/antigravity-acp/main/install-codex.sh | sh
+```
+
+Then restart Codex, trust the plugin's hook once (**Settings > Hooks**, or `/hooks`
+in the CLI), and type `/agy hello`. Manual steps:
+[`codex/agy/README.md`](codex/agy/README.md).
+
+装完重启 Codex，在 **设置 > Hooks** 里信任一次这个钩子，然后输入 `/agy 你好`。
 
 ## How it works / 原理
 

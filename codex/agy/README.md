@@ -25,7 +25,25 @@ The same bridge and token are shared with the Claude Code plugin
 - Node.js 18+ and `agy` (Antigravity CLI) on PATH
 - `agy` logged in: `agy acp --login`
 
-## Install (Codex desktop)
+## Install: one line
+
+Windows (PowerShell):
+
+```powershell
+irm https://raw.githubusercontent.com/lvdoushacc/antigravity-acp/main/install-codex.ps1 | iex
+```
+
+macOS / Linux:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/lvdoushacc/antigravity-acp/main/install-codex.sh | sh
+```
+
+The script does the manual steps below, keeping any other plugins you have
+listed. Then restart Codex and trust the hook under **Settings > Hooks**
+(or `/hooks` in the CLI). Installing a plugin does not trust its hooks.
+
+## Install by hand (Codex desktop)
 
 1. Copy this folder to `~/.codex/plugins/agy`.
 2. Create or extend `~/.agents/plugins/marketplace.json`:
