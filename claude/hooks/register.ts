@@ -58,12 +58,13 @@ function headers() {
   return { 'content-type': 'application/json', 'x-bridge-token': token }
 }
 
-async function healthy($: EngineInterface) {
+/** 'ok', 'denied' (a bridge with another token holds the port), or 'down'. */
+async function bridgeState($: EngineInterface): Promise<'ok' | 'denied' | 'down'> {
   try {
     const r = await $.http.fetch(`${BASE}/health`, { headers: headers() })
-    return r.ok
+    return r.ok ? 'ok' : r.status === 401 ? 'denied' : 'down'
   } catch {
-    return false
+    return 'down'
   }
 }
 
@@ -139,9 +140,15 @@ type RunResult = { job: Job } | { error: string }
 
 async function runJob($: EngineInterface, input: AskInput, signal: AbortSignal): Promise<RunResult> {
   // Wait for the bridge (it starts with the session; give it a moment).
-  for (let i = 0; !(await healthy($)); i++) {
-    if (i >= 20) return { error: 'Antigravity bridge is not running (is `node` and `agy` on PATH?). See `claude --debug` for its log.' }
-    await $.clock.sleep(500)
+  // Sleeps count against the hook's 10 s budget, so keep this short.
+  for (let i = 0; ; i++) {
+    const state = await bridgeState($)
+    if (state === 'ok') break
+    if (state === 'denied') {
+      return { error: `另一个接线员占着端口 ${PORT}，但口令对不上（多半是旧版本留下的）。结束那个 node acp-bridge.mjs 进程，或者重启电脑后再试。` }
+    }
+    if (i >= 10) return { error: '接线员没在运行（检查 node 和 agy 是否在 PATH 里）。详情见 `claude --debug`。' }
+    await $.clock.sleep(300)
   }
 
   const created = await $.http.fetch(`${BASE}/jobs`, {
