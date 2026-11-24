@@ -1,0 +1,5 @@
+*.log
+.token
+.DS_Store
+.claude-plugin/types/
+claude/.claude-plugin/types/

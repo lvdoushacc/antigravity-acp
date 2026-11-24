@@ -1,0 +1,11 @@
+{
+  "name": "antigravity-acp",
+  "version": "0.1.0",
+  "description": "Use Antigravity (agy) as a subagent over a warm ACP connection",
+  "network": {
+    "hosts": [
+      "127.0.0.1"
+    ]
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,11 @@
+{
+  "name": "antigravity-acp",
+  "owner": { "name": "lvdoushacc" },
+  "plugins": [
+    {
+      "name": "antigravity-acp",
+      "source": "./claude",
+      "description": "Use Antigravity (agy) as a subagent over a warm ACP connection"
+    }
+  ]
+}
